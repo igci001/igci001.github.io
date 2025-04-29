@@ -30,9 +30,10 @@ jobs:
       - name: Build Angular (SSR-Projekt → Prerender)
         run: |
           npm ci
-          PROJECT=$(node -p "require('./angular.json').defaultProject")
-          npx ng run $PROJECT:prerender --configuration production --base-href "/"
-          echo "$DOMAIN" > dist/$PROJECT/browser/CNAME   # für Pages-Domain
+          PROJECT=$(node -p "Object.keys(require('./angular.json').projects)[0]")
+          npx ng run ${PROJECT}:prerender:production --base-href "/"
+          echo "emirhan-igci.me" > dist/${PROJECT}/browser/CNAME
+          
 
       # 4) Artefakt an Pages übergeben
       - uses: actions/upload-pages-artifact@v3
