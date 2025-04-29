@@ -29,10 +29,9 @@ jobs:
       # 3) Abhängigkeiten & Build (mit Prerender)
       - name: Build Angular (SSR-Projekt → Prerender)
         run: |
-          npm ci
-          PROJECT=$(node -p "Object.keys(require('./angular.json').projects)[0]")
-          npx ng run ${PROJECT}:prerender:production --base-href "/"
-          echo "emirhan-igci.me" > dist/${PROJECT}/browser/CNAME
+          npm install
+          npm run-script deploy  
+          echo "emirhan-igci.me" > dist/portfolio/browser/CNAME
           
 
       # 4) Artefakt an Pages übergeben
