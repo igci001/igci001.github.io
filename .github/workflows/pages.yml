@@ -1,50 +1,44 @@
-name: Deploy Angular to GitHub Pages
-
-# ► Auslöser – nur Builds vom main-Branch veröffentlichen
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]        # oder main – passend zu deinem Repo
 
-permissions:
-  contents: read           # Quellcode auschecken
-  pages: write             # Artefakt zu GitHub Pages hochladen
-  id-token: write          # OIDC-Signatur für deploy-pages
-
-env:
-  DOMAIN: emirhan-igci.me  # deine Custom-Domain
+permissions:                    # nötig für die neuen Pages-Actions
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 1) Repo holen
-      - uses: actions/checkout@v4
+    - name: Checkout 🔍
+      uses: actions/checkout@v4
 
-      # 2) Node 20 + npm-Cache
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+    - name: Setup Node.js 💾
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20        # aktuelle LTS
+        cache: "npm"            # npm-Cache automatisch
 
-      # 3) Abhängigkeiten & Build (mit Prerender)
-      - name: Build Angular (SSR-Projekt → Prerender)
-        run: |
-          npm install
-          npm run-script deploy  
-          echo "emirhan-igci.me" > dist/portfolio/browser/CNAME
-          
+    - name: Install dependencies 📦
+      run: npm ci
 
-      # 4) Artefakt an Pages übergeben
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist/$(node -p "require('./angular.json').defaultProject")/browser
+    - name: Build Angular app 🏗️
+      run: npm run deploy       # ruft das Skript aus package.json auf
+
+    - name: Upload Pages artifact ⬆️
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: dist/portfolio    # ggf. dist/<PROJECT>/browser bei SSR
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url }}
+
     steps:
-      - uses: actions/deploy-pages@v4        # veröffentlicht die Site
-        id: deployment
+    - name: Deploy to GitHub Pages 🚀
+      id: deploy
+      uses: actions/deploy-pages@v2
